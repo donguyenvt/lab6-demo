@@ -9,8 +9,14 @@
 import UIKit
 import MapKit
 
+protocol PhotoMapViewControllerDelegate {
+    func fullImagePicked(image: UIImage)
+}
+
 class PhotoMapViewController: UIViewController {
     var image: UIImage!
+    var currentAnnotation: PhotoAnnotation!
+    var delegate: PhotoMapViewControllerDelegate!
     
     @IBOutlet weak var mapView: MKMapView!
     override func viewDidLoad() {
@@ -51,9 +57,17 @@ class PhotoMapViewController: UIViewController {
         if segue.identifier == "tagSegue" {
             let locationsVC = segue.destinationViewController as! LocationsViewController
             locationsVC.delegate = self
-            
+        } else if segue.identifier == "fullImageSegue" {
+            let vc = segue.destinationViewController as! FullImageViewController
+            vc.photo = currentAnnotation.photo
+            print("vc", vc)
         }
-        
+    }
+    
+    func showFullView(sender: UITapGestureRecognizer) {
+        let button     = sender.view as! MyUIButton
+        currentAnnotation = button.annotation
+        performSegueWithIdentifier("fullImageSegue", sender: self)
     }
 }
 
@@ -99,25 +113,33 @@ extension PhotoMapViewController: MKMapViewDelegate {
             annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseID)
             annotationView!.canShowCallout = true
             annotationView!.leftCalloutAccessoryView = UIImageView(frame: CGRect(x:0, y:0, width: 50, height:50))
+            
+            let button = MyUIButton(type: .DetailDisclosure)
+            button.annotation = annotation as! PhotoAnnotation
+            let recognizer = UITapGestureRecognizer(target: self, action: "showFullView:")
+            button.addGestureRecognizer(recognizer)
+            annotationView!.rightCalloutAccessoryView = button
         }
         
-        let imageView = annotationView?.leftCalloutAccessoryView as! UIImageView
+        let imageView = annotationView!.leftCalloutAccessoryView as! UIImageView
         // imageView.image = UIImage(named: "camera")
         let resizeRenderImageView = UIImageView(frame: CGRectMake(0, 0, 45, 45))
         resizeRenderImageView.layer.borderColor = UIColor.whiteColor().CGColor
         resizeRenderImageView.layer.borderWidth = 3.0
         resizeRenderImageView.contentMode = UIViewContentMode.ScaleAspectFill
         resizeRenderImageView.image = (annotation as? PhotoAnnotation)?.photo
-
+        
         UIGraphicsBeginImageContext(resizeRenderImageView.frame.size)
         resizeRenderImageView.layer.renderInContext(UIGraphicsGetCurrentContext()!)
         let thumbnail = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-
+        
         imageView.image = thumbnail
-
-
         
         return annotationView
     }
+}
+
+class MyUIButton: UIButton {
+    var annotation: PhotoAnnotation!
 }

@@ -114,7 +114,8 @@ class LocationsViewController: UIViewController, UITableViewDelegate, UITableVie
         let venue = results[indexPath.row] as! NSDictionary
         let lat = venue.valueForKeyPath("location.lat") as! NSNumber
         let lng = venue.valueForKeyPath("location.lng") as! NSNumber
-        
+
+
         delegate.locationsPickedLocation(self, latitude: lat, longitude: lng)
         navigationController!.popToRootViewControllerAnimated(true)
     }
