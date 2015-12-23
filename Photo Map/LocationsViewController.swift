@@ -9,7 +9,12 @@
 import UIKit
 import MapKit
 
+protocol LocationsViewControllerDelegate : class {
+    func locationsPickedLocation(controller: LocationsViewController, latitude: NSNumber, longitude: NSNumber)
+}
+
 class LocationsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
+    weak var delegate: LocationsViewControllerDelegate!
     
     // TODO: Fill in actual CLIENT_ID and CLIENT_SECRET
     let CLIENT_ID = "QA1L0Z0ZNA2QVEEDHFPQWK0I5F1DE3GPLSNW4BZEBGJXUCFL"
@@ -74,7 +79,7 @@ class LocationsViewController: UIViewController, UITableViewDelegate, UITableVie
                 if let data = dataOrNil {
                     if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
                         data, options:[]) as? NSDictionary {
-                            NSLog("response: \(responseDictionary)")
+                            // NSLog("response: \(responseDictionary)")
                             self.results = responseDictionary.valueForKeyPath("response.venues") as! NSArray
                             self.tableView.reloadData()
                             
@@ -102,6 +107,15 @@ class LocationsViewController: UIViewController, UITableViewDelegate, UITableVie
         let latString = "\(lat)"
         let lngString = "\(lng)"
         
-        print(latString + " " + lngString)
+        // print(latString + " " + lngString)
+    }
+    
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        let venue = results[indexPath.row] as! NSDictionary
+        let lat = venue.valueForKeyPath("location.lat") as! NSNumber
+        let lng = venue.valueForKeyPath("location.lng") as! NSNumber
+        
+        delegate.locationsPickedLocation(self, latitude: lat, longitude: lng)
+        navigationController!.popToRootViewControllerAnimated(true)
     }
 }
