@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MapKit
 
 class LocationsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
     
