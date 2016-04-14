@@ -25,27 +25,19 @@ class PhotoMapViewController: UIViewController {
         mapView.delegate = self
         
         // Do any additional setup after loading the view.
-        let sfRegion = MKCoordinateRegionMake(CLLocationCoordinate2DMake(37.783333, -122.416667),
-            MKCoordinateSpanMake(0.1, 0.1))
+        let sfRegion = MKCoordinateRegionMake(CLLocationCoordinate2DMake(37.783333, -122.416667), MKCoordinateSpanMake(0.1, 0.1))
         mapView.setRegion(sfRegion, animated: false)
         
-        let tap = UITapGestureRecognizer(target: self, action: "cameraButtonTapped")
+        let tap = UITapGestureRecognizer(target: self, action: #selector(PhotoMapViewController.cameraButtonTapped))
         cameraButtonImageView.addGestureRecognizer(tap)
     }
     
     func cameraButtonTapped() {
-        print("tapped")
         let vc = UIImagePickerController()
         vc.delegate = self
         vc.sourceType = .PhotoLibrary
         presentViewController(vc, animated: true, completion: nil)
     }
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
     
     @IBOutlet weak var cameraButtonImageView: UIImageView!
     // MARK: - Navigation
@@ -60,7 +52,6 @@ class PhotoMapViewController: UIViewController {
         } else if segue.identifier == "fullImageSegue" {
             let vc = segue.destinationViewController as! FullImageViewController
             vc.photo = currentAnnotation.photo
-            print("vc", vc)
         }
     }
     
@@ -108,21 +99,6 @@ extension PhotoMapViewController: MKMapViewDelegate {
         
         var annotationView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseID)
         
-        // create it if it's te first time
-        if (annotationView == nil) {
-            annotationView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseID)
-            annotationView!.canShowCallout = true
-            annotationView!.leftCalloutAccessoryView = UIImageView(frame: CGRect(x:0, y:0, width: 50, height:50))
-            
-            let button = MyUIButton(type: .DetailDisclosure)
-            button.annotation = annotation as! PhotoAnnotation
-            let recognizer = UITapGestureRecognizer(target: self, action: "showFullView:")
-            button.addGestureRecognizer(recognizer)
-            annotationView!.rightCalloutAccessoryView = button
-        }
-        
-        let imageView = annotationView!.leftCalloutAccessoryView as! UIImageView
-        // imageView.image = UIImage(named: "camera")
         let resizeRenderImageView = UIImageView(frame: CGRectMake(0, 0, 45, 45))
         resizeRenderImageView.layer.borderColor = UIColor.whiteColor().CGColor
         resizeRenderImageView.layer.borderWidth = 3.0
@@ -134,8 +110,28 @@ extension PhotoMapViewController: MKMapViewDelegate {
         let thumbnail = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         
+        // create it if it's te first time
+        if (annotationView == nil) {
+            annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: reuseID)
+            annotationView!.canShowCallout = true
+            annotationView!.leftCalloutAccessoryView = UIImageView(frame: CGRect(x:0, y:0, width: 50, height:50))
+            
+            let button = MyUIButton(type: .DetailDisclosure)
+            button.annotation = annotation as! PhotoAnnotation
+            let recognizer = UITapGestureRecognizer(target: self, action: #selector(PhotoMapViewController.showFullView(_:)))
+            button.addGestureRecognizer(recognizer)
+            annotationView!.rightCalloutAccessoryView = button
+        }
+
+        let imageView = annotationView!.leftCalloutAccessoryView as! UIImageView
+        // imageView.image = UIImage(named: "camera")
         imageView.image = thumbnail
-        
+        annotationView!.image = thumbnail
+
+        // NOTE: you can take advantage of iOS 9 .detailCalloutAccessoryView
+        // if #available(iOS 9, *) {
+        //   annotationView!.detailCalloutAccessoryView = someCoolUIViewInstance
+        // }
         return annotationView
     }
 }

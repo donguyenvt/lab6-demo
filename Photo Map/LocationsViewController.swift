@@ -33,11 +33,6 @@ class LocationsViewController: UIViewController, UITableViewDelegate, UITableVie
         searchBar.delegate = self
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return results.count
     }
@@ -89,34 +84,12 @@ class LocationsViewController: UIViewController, UITableViewDelegate, UITableVie
         task.resume()
     }
     
-    // MARK: - Navigation
-    
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-        let cell = sender as! UITableViewCell
-        let indexPath = tableView.indexPathForCell(cell)!
-        
-        // This is the selected venue
-        let venue = results[indexPath.row] as! NSDictionary
-        
-        let lat = venue.valueForKeyPath("location.lat") as! NSNumber
-        let lng = venue.valueForKeyPath("location.lng") as! NSNumber
-        
-        let latString = "\(lat)"
-        let lngString = "\(lng)"
-        
-        // print(latString + " " + lngString)
-    }
-    
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let venue = results[indexPath.row] as! NSDictionary
         let lat = venue.valueForKeyPath("location.lat") as! NSNumber
         let lng = venue.valueForKeyPath("location.lng") as! NSNumber
-
-
+        
         delegate.locationsPickedLocation(self, latitude: lat, longitude: lng)
-        navigationController!.popToRootViewControllerAnimated(true)
+        navigationController!.popViewControllerAnimated(true)
     }
 }
